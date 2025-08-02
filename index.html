@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciativa Abençoada por Thorun</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for general text, and a more decorative font for titles -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #c9e9ff 50%, #a7d9ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            overflow: auto;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+        }
+        h1 {
+            font-family: 'Cinzel Decorative', serif;
+            color: #4a5568;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        .initiative-list {
+            list-style: none;
+            padding: 0;
+        }
+        .initiative-item {
+            background: linear-gradient(45deg, #e0f2fe 0%, #bbdefb 100%);
+            border: 1px solid #90caf9;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            color: #2c5282;
+            font-weight: 600;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: grab; /* Indica que o item pode ser arrastado */
+        }
+        .initiative-item.dragging {
+            opacity: 0.5; /* Efeito de opacidade para o item arrastado */
+        }
+        .initiative-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        .initiative-item span:first-child {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.3rem;
+            color: #1a365d;
+            margin-right: 0.75rem;
+            min-width: 25px;
+            text-align: right;
+        }
+        .item-details {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .item-stats {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+        .stat-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #90caf9;
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+            background-color: #fff;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .stat-input:focus {
+            outline: none;
+            border-color: #1a365d;
+            box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.2);
+        }
+        .footer-text {
+            font-family: 'Cinzel Decorative', serif;
+            color: #718096;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-bold mb-6 text-gray-700">INICIATIVA ABENÇOADA POR THORUN</h1>
+
+        <ul id="initiative-list" class="initiative-list">
+            <!-- A lista será renderizada aqui via JavaScript -->
+        </ul>
+
+        <p class="footer-text">Monte Fu acima de tudo, Thorun acima de todos.</p>
+    </div>
+
+    <script>
+        // Array de objetos para armazenar os dados dos personagens
+        let characters = [
+            { name: 'Kassian', cura: 0, dano: 0 },
+            { name: 'Krono', cura: 0, dano: 0 },
+            { name: 'Arktoz', cura: 0, dano: 0 },
+            { name: 'Shii Sylan', cura: 0, dano: 0 },
+            { name: 'Diana', cura: 0, dano: 0 },
+            { name: 'Yoko', cura: 0, dano: 0 },
+            { name: 'Doran', cura: 0, dano: 0 },
+            { name: 'Athenn', cura: 0, dano: 0 }
+        ];
+
+        // Elemento da lista onde os itens serão renderizados
+        const initiativeList = document.getElementById('initiative-list');
+
+        // Variável para armazenar o item que está sendo arrastado
+        let draggedItem = null;
+
+        // Função para renderizar a lista de iniciativa
+        function renderList() {
+            initiativeList.innerHTML = ''; // Limpa a lista antes de renderizar
+            characters.forEach((char, index) => {
+                const li = document.createElement('li');
+                li.classList.add('initiative-item');
+                li.draggable = true;
+                li.dataset.index = index;
+
+                li.innerHTML = `
+                    <div class="item-details">
+                        <span>${index + 1}.</span>
+                        ${char.name}
+                    </div>
+                    <div class="item-stats">
+                        <span>CURA</span>
+                        <input type="number" class="stat-input" value="${char.cura}" data-stat="cura" data-index="${index}">
+                        <span>DANO</span>
+                        <input type="number" class="stat-input" value="${char.dano}" data-stat="dano" data-index="${index}">
+                    </div>
+                `;
+
+                // Adiciona os event listeners de arrastar e soltar
+                li.addEventListener('dragstart', handleDragStart);
+                li.addEventListener('dragover', handleDragOver);
+                li.addEventListener('dragend', handleDragEnd);
+                li.addEventListener('drop', handleDrop);
+
+                // Adiciona o event listener para as mudanças nos inputs
+                li.querySelectorAll('.stat-input').forEach(input => {
+                    input.addEventListener('input', handleStatChange);
+                });
+
+                initiativeList.appendChild(li);
+            });
+        }
+
+        // Funções para lidar com o evento de arrastar
+        function handleDragStart(e) {
+            draggedItem = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', draggedItem.innerHTML);
+            setTimeout(() => {
+                draggedItem.classList.add('dragging');
+            }, 0);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (e.target.closest('.initiative-item') && e.target.closest('.initiative-item') !== draggedItem) {
+                const targetItem = e.target.closest('.initiative-item');
+                const bounding = targetItem.getBoundingClientRect();
+                const offset = bounding.y + (bounding.height / 2);
+                if (e.clientY - offset > 0) {
+                    targetItem.style.borderBottom = '2px solid #1a365d';
+                    targetItem.style.borderTop = 'none';
+                } else {
+                    targetItem.style.borderTop = '2px solid #1a365d';
+                    targetItem.style.borderBottom = 'none';
+                }
+            }
+        }
+
+        function handleDragEnd() {
+            draggedItem.classList.remove('dragging');
+            draggedItem = null;
+            // Remove as bordas de feedback
+            const items = document.querySelectorAll('.initiative-item');
+            items.forEach(item => {
+                item.style.borderTop = 'none';
+                item.style.borderBottom = 'none';
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const targetItem = e.target.closest('.initiative-item');
+            if (targetItem && draggedItem && targetItem !== draggedItem) {
+                const dragIndex = parseInt(draggedItem.dataset.index);
+                const dropIndex = parseInt(targetItem.dataset.index);
+
+                // Reordena o array de personagens
+                const [movedItem] = characters.splice(dragIndex, 1);
+                characters.splice(dropIndex, 0, movedItem);
+
+                renderList(); // Re-renderiza a lista com a nova ordem
+            }
+            handleDragEnd();
+        }
+
+        // Função para lidar com a mudança nos inputs de Cura e Dano
+        function handleStatChange(e) {
+            const input = e.target;
+            const index = parseInt(input.dataset.index);
+            const stat = input.dataset.stat;
+            const value = parseInt(input.value);
+
+            if (!isNaN(value)) {
+                characters[index][stat] = value;
+            }
+        }
+
+        // Inicializa a página renderizando a lista
+        document.addEventListener('DOMContentLoaded', renderList);
+    </script>
+</body>
+</html>
