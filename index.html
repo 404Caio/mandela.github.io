@@ -111,6 +111,38 @@
             font-size: 0.9rem;
             font-style: italic;
         }
+        .add-character-section {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-character-input {
+            flex-grow: 1;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #90caf9;
+            background-color: #fff;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .add-character-input:focus {
+            outline: none;
+            border-color: #1a365d;
+            box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.2);
+        }
+        .add-character-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            background: #1a365d;
+            color: #e0f2fe;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .add-character-button:hover {
+            background-color: #2c5282;
+            transform: translateY(-1px);
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -120,6 +152,11 @@
 <body>
     <div class="container">
         <h1 class="text-4xl font-bold mb-6 text-gray-700">INICIATIVA ABENÇOADA POR THORUN</h1>
+        
+        <div class="add-character-section">
+            <input type="text" id="new-character-name" placeholder="Nome do novo personagem" class="add-character-input" aria-label="Nome do novo personagem">
+            <button id="add-character-button" class="add-character-button">Adicionar</button>
+        </div>
 
         <ul id="initiative-list" class="initiative-list">
             <!-- A lista será renderizada aqui via JavaScript -->
@@ -141,8 +178,10 @@
             { name: 'Athenn', cura: 0, dano: 0 }
         ];
 
-        // Elemento da lista onde os itens serão renderizados
+        // Elementos da lista e de adição de personagens
         const initiativeList = document.getElementById('initiative-list');
+        const newCharacterNameInput = document.getElementById('new-character-name');
+        const addCharacterButton = document.getElementById('add-character-button');
 
         // Variável para armazenar o item que está sendo arrastado
         let draggedItem = null;
@@ -186,12 +225,16 @@
 
         // Funções para lidar com o evento de arrastar
         function handleDragStart(e) {
-            draggedItem = e.target;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', draggedItem.innerHTML);
-            setTimeout(() => {
-                draggedItem.classList.add('dragging');
-            }, 0);
+            // Corrige o alvo para ser o item 'li' arrastável
+            const target = e.target.closest('.initiative-item');
+            if (target) {
+                draggedItem = target;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', target.innerHTML);
+                setTimeout(() => {
+                    target.classList.add('dragging');
+                }, 0);
+            }
         }
 
         function handleDragOver(e) {
@@ -201,19 +244,26 @@
                 const targetItem = e.target.closest('.initiative-item');
                 const bounding = targetItem.getBoundingClientRect();
                 const offset = bounding.y + (bounding.height / 2);
+                
+                // Adiciona feedback visual para onde o item será solto
+                const items = document.querySelectorAll('.initiative-item');
+                items.forEach(item => {
+                    item.style.borderTop = 'none';
+                    item.style.borderBottom = 'none';
+                });
                 if (e.clientY - offset > 0) {
                     targetItem.style.borderBottom = '2px solid #1a365d';
-                    targetItem.style.borderTop = 'none';
                 } else {
                     targetItem.style.borderTop = '2px solid #1a365d';
-                    targetItem.style.borderBottom = 'none';
                 }
             }
         }
 
         function handleDragEnd() {
-            draggedItem.classList.remove('dragging');
-            draggedItem = null;
+            if (draggedItem) {
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+            }
             // Remove as bordas de feedback
             const items = document.querySelectorAll('.initiative-item');
             items.forEach(item => {
@@ -249,7 +299,21 @@
                 characters[index][stat] = value;
             }
         }
-
+        
+        // Função para adicionar um novo personagem
+        function handleAddCharacter() {
+            const newName = newCharacterNameInput.value.trim();
+            if (newName) {
+                const newCharacter = { name: newName, cura: 0, dano: 0 };
+                characters.push(newCharacter);
+                renderList();
+                newCharacterNameInput.value = ''; // Limpa o campo de input
+            }
+        }
+        
+        // Adiciona o event listener ao botão de adicionar
+        addCharacterButton.addEventListener('click', handleAddCharacter);
+        
         // Inicializa a página renderizando a lista
         document.addEventListener('DOMContentLoaded', renderList);
     </script>
